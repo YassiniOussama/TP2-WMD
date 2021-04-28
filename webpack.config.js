@@ -8,6 +8,7 @@ module.exports = (env, argv) => {
     console.log(argv.mode);
     return {
         entry: "./client/index.jsx",
+        devtool: "eval-source-map",
         output: { // NEW
             path: path.join(__dirname, 'dist'),
             filename: "[name].js"
@@ -23,13 +24,25 @@ module.exports = (env, argv) => {
                     }
                 },
                 {
+                    test: /\.css$/i,
+                    use: [
+                      "style-loader", // handlebars loader expects raw resource string
+                      "css-loader",
+                    ],
+                  },
+                {
                     test: /\.(png|svg|jpg|gif)$/,
                     loader: "file-loader",
                     options: { name: '/static/[name].[ext]' }
-                  }
-                  
+                }
+
             ]
         },
-        watch: argv.mode === 'development'
+        resolve: {
+            extensions: ['.js', '.jsx', '.css']
+        },
+        watch: argv.mode === 'development',
+
+
     };
 };
