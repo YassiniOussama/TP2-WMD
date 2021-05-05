@@ -1,13 +1,11 @@
 import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
-import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
-import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import {
-    useLocation, useParams, useRouteMatch
-} from "react-router-dom";  
+import { useParams } from "react-router-dom";
+import { useDispatch } from 'react-redux'
+import { setBoard } from '../../actions';
 
 const useStyles = makeStyles({
     app: {
@@ -33,10 +31,20 @@ const useStyles = makeStyles({
 
 export default function Board({ board, index }) {
     const classes = useStyles();
+    const dispatch = useDispatch();
     let { id } = useParams();
 
+    useEffect(() => {
+        if(parseInt(id, 10)  > -1){
+            if (parseInt(id, 10) !== index)
+                dispatch(setBoard(parseInt(id, 10)));
+            else
+                dispatch(setBoard(parseInt(index)));
+        }
+    }, [id]);
 
     console.log(id);
+    console.log(index);
 
     if (!id)
         id = index;
@@ -45,9 +53,11 @@ export default function Board({ board, index }) {
 
         <>
             <div style={{ display: "inline-block" }} className="app">
-                {board[id].postits.map((posit, index) => (
+
+                {board[id] !== undefined ? board[id].postits.map((posit, index) => (
                     <>
                         <Card className={classes.root} key={index}>
+
                             <CardContent >
                                 <Typography className={classes.title} color="textSecondary" gutterBottom>
                                     {id}
@@ -67,11 +77,12 @@ export default function Board({ board, index }) {
                                     {'"a benevolent smile"'}
                                 </Typography>
                             </CardContent>
+
                         </Card>
 
 
                     </>
-                ))}
+                )) : ""}
             </div>
         </>
     );

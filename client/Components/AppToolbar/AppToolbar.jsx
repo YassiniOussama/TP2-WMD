@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
@@ -15,17 +15,21 @@ import MailIcon from '@material-ui/icons/Mail';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import NavigateBefore from '@material-ui/icons/NavigateBefore';
+import AddIcon from '@material-ui/icons/Add';
+import UpdateIcon from '@material-ui/icons/Update';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import useStyles from "./style";
 import { Link, BrowserRouter as Router } from 'react-router-dom'
-import { connect } from "react-redux";
+import { connect, useSelector } from "react-redux";
 import { nextBoard } from "../../actions/index";
-
+import { setBoard } from '../../actions';
+import { useDispatch } from 'react-redux'
+import { useParams, useLocation } from "react-router-dom";
 
 const mapStateToProps = (state) => {
   return {
     boards: state.boards,
-    index:state.index
+    index: state.index
   }
 }
 
@@ -37,11 +41,35 @@ const mapDispatchToProps = (dispatch) => {
 }
 
 
- function PrimarySearchAppBar(props) {
+function PrimarySearchAppBar(props) {
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [boardAnchorEl, setBoardAnchorEl] = React.useState(null);
-  const [title, setTitle] = React.useState(props.boards[props.index].title);
+  let id = useSelector(state => state.index);
+  const [title, setTitle] = React.useState(null);
+  let location = useLocation();
+  let { aa } = useParams();
+  console.log("aa");
+  console.log(id);
+  console.log(props.index);
+  console.log(location.pathname);
+  const dispatch = useDispatch();
+
+
+  useEffect(() => {
+
+    if (parseInt(id, 10) > -1) {
+      console.log(id);
+      setTitle(props.boards[parseInt(id, 10)].title);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (location.pathname === '/')
+    setTitle(props.boards[id].title);
+  else if (location.pathname === '/add')
+    setTitle("Add Board");
+  }, [location.pathname]);
 
   const isMenuOpen = Boolean(anchorEl);
   const isBoardMenuOpen = Boolean(boardAnchorEl);
@@ -83,6 +111,7 @@ const mapDispatchToProps = (dispatch) => {
   );
 
   const boardMenuId = 'primary-search-account-menu-board';
+
   const renderMenuBords = (
     <Menu
       anchorEl={boardAnchorEl}
@@ -94,7 +123,6 @@ const mapDispatchToProps = (dispatch) => {
       onClose={handleBoardMenuClose}
     >
       {props.boards.map((board, index) => (
-
         <Link to={`/${index}`} className={classes.links} key={index}>
           <MenuItem onClick={() => changeBoard(index)}>{board.title}</MenuItem>
         </Link>
@@ -133,17 +161,58 @@ const mapDispatchToProps = (dispatch) => {
               }}
               inputProps={{ 'aria-label': 'search' }}
             />
-          
+
           </div>
 
-          <IconButton
-            onClick={props.nextBoard}
-            color="inherit"
-            aria-label="Next"
-            aria-haspopup="true"
-          >
-            <NavigateNextIcon />
-          </IconButton>
+          <>
+            {
+              id > -1 ?
+                <>
+                  <IconButton
+                    color="inherit"
+                    aria-label="Next"
+                    aria-haspopup="true"
+                  >
+                    <Link to={`/${id - 1}`} className={classes.links} >
+                      <NavigateBefore />
+                    </Link>
+
+                  </IconButton>
+
+                  <IconButton
+                    color="inherit"
+                    aria-label="Next"
+                    aria-haspopup="true"
+                  >
+                    <Link to={`/${id + 1}`} className={classes.links} >
+                      <NavigateNextIcon />
+                    </Link>
+                  </IconButton>
+
+                  <IconButton
+                    color="inherit"
+                    aria-label="Next"
+                    aria-haspopup="true"
+                  >
+                    <Link to={'/add'} className={classes.links} >
+                      <AddIcon />
+                    </Link>
+                  </IconButton>
+                  <IconButton
+                    color="inherit"
+                    aria-label="Next"
+                    aria-haspopup="true"
+                  >
+                    <Link to={`/update/${id}`} className={classes.links}>
+                      <UpdateIcon />
+                    </Link>
+
+                  </IconButton>
+                </>
+                : null
+
+            }
+          </>
 
 
           <div className={classes.grow} />
@@ -178,4 +247,4 @@ const mapDispatchToProps = (dispatch) => {
   );
 }
 
-export default connect(mapStateToProps,mapDispatchToProps)(PrimarySearchAppBar)
+export default connect(mapStateToProps, mapDispatchToProps)(PrimarySearchAppBar)

@@ -1,4 +1,4 @@
-import { CREATE_BOARD, NEXT_BOARD, DELETE_BOARD } from '../actions/index';
+import { CREATE_BOARD, SET_BOARD, GET_BOARD,NEXT_BOARD, PREVIOUS_BOARD, DELETE_BOARD } from '../actions/index';
 
 const initialState = {
   index: 0, // initialise votre presentation au mur 1
@@ -58,6 +58,21 @@ const initialState = {
           color: "#CCC",
         },],
     },
+    {
+      type: "board",
+      id: "4",
+      title: "Book",
+      notes: "",
+      postits: [
+        {
+          type: "postit",
+          board: "4",
+          title: "Book 1",
+          text: "Book React",
+          visible: false,
+          color: "#CCC",
+        },],
+    },
   ] // vous pouvez réutiliser votre état de murs initial.
 };
 function rootReducer(state = initialState, action) {
@@ -67,12 +82,28 @@ function rootReducer(state = initialState, action) {
         boards: state.boards.concat(action.payload),
         index: state.index
       };
-    case NEXT_BOARD:
+      /*case NEXT_BOARD:
+        console.log('2éé');
+        return {
+          ...state,
+          // boards: state,
+          index: state.index + 1
+        };
+        case PREVIOUS_BOARD:
       console.log('2éé');
-      return{
+      return {
         ...state,
-       // boards: state,
-        index: state.index+1
+        index: state.index - 1
+      };*/
+    case SET_BOARD:
+      return {
+        ...state,
+        index: action.index
+      };
+    case GET_BOARD:
+      return {
+        ...state,
+        index: action.index
       };
     case DELETE_BOARD:
       return;
