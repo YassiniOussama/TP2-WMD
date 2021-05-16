@@ -1,4 +1,5 @@
 import { fade, makeStyles } from '@material-ui/core/styles';
+import red from '@material-ui/core/colors/red';
 
 export default makeStyles((theme) => ({
     grow: {
@@ -11,6 +12,12 @@ export default makeStyles((theme) => ({
         display: 'none',
         [theme.breakpoints.up('sm')]: {
             display: 'block',
+        },
+    },
+    iconHover: {
+        margin: theme.spacing.unit * 2,
+        '&:hover': {
+            color: red[800],
         },
     },
     links: {

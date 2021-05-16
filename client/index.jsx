@@ -9,38 +9,16 @@ import {
 } from "react-router-dom";
 import { Provider } from 'react-redux';
 import store from "./store/index";
-import { createBoard } from "./actions/index";
 import Form from './Components/Board/Form';
+import FormPostIT from './Components/POSTIT/Form';
 
 export default function App() {
   window.store = store;
-  console.log(store.getState());
+ /* console.log(store.getState());
   console.log(store.getState().boards);
-
   const unsubscribe = store.subscribe( () => console.log('Updated state ', store.getState));
- 
- /* store.dispatch( createBoard( {
-    type: "board",
-    id: "3",
-    title: "TDs",
-    notes: "",
-    postits: [
-      {
-        type: "postit",
-        board: "3",
-        title: "TD 1",
-        text: "TD React",
-        visible: false,
-        color: "#CCC",
-      },],
-  },
-  
-  ));*/
-  console.log(store.getState());
-  console.log(store.getState().boards);
-
   unsubscribe();
-
+*/
   return (
     <div className="app">
       <PrimarySearchAppBar boards={store.getState().boards} index={store.getState().index}  />
@@ -48,13 +26,13 @@ export default function App() {
         <Route exact path="/">
           <Board board={store.getState().boards} index={store.getState().index} />
         </Route>
-        <Route exact path="/:id" >
+        <Route exact path="/board/:id_props" >
           <Board board={store.getState().boards} index={store.getState().index} />
         </Route>
-        <Route exact path='/update/:id' component={Form}></Route>
-        <Route exact path="/add">
-          <Form />
-        </Route>
+        <Route exact path='/add/board' component={Form}></Route>
+        <Route exact path='/update/board/:id' component={Form}></Route>
+        <Route exact path='/add/postit' component={FormPostIT}></Route>
+        <Route exact path='/update/postit/:idx_postit' component={FormPostIT}></Route>
       </Switch>
     </div>
   );

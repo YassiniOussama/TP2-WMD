@@ -1,13 +1,5 @@
 import React, { useEffect } from 'react';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import IconButton from '@material-ui/core/IconButton';
-import Button from '@material-ui/core/Menu';
-import Typography from '@material-ui/core/Typography';
-import InputBase from '@material-ui/core/InputBase';
-import Badge from '@material-ui/core/Badge';
-import MenuItem from '@material-ui/core/MenuItem';
-import Menu from '@material-ui/core/Menu';
+import { AppBar, Toolbar, IconButton, Typography, InputBase, Badge, MenuItem, Menu } from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
 import SearchIcon from '@material-ui/icons/Search';
 import AccountCircle from '@material-ui/icons/AccountCircle';
@@ -17,14 +9,13 @@ import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import NavigateBefore from '@material-ui/icons/NavigateBefore';
 import AddIcon from '@material-ui/icons/Add';
 import UpdateIcon from '@material-ui/icons/Update';
+import DeleteIcon from '@material-ui/icons/Delete';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import useStyles from "./style";
-import { Link, BrowserRouter as Router } from 'react-router-dom'
-import { connect, useSelector } from "react-redux";
-import { nextBoard } from "../../actions/index";
-import { setBoard } from '../../actions';
-import { useDispatch } from 'react-redux'
-import { useParams, useLocation } from "react-router-dom";
+import { Link } from 'react-router-dom'
+import { connect, useDispatch, useSelector } from "react-redux";
+import { deleteBoard, setBoard, nextBoard, previousBoard } from '../../actions';
+import { useParams, useLocation, useHistory } from "react-router-dom";
 
 const mapStateToProps = (state) => {
   return {
@@ -34,84 +25,108 @@ const mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = (dispatch) => {
-  return {
-    nextBoard: () => dispatch(nextBoard(true)),
-    // previousBoard: () => dispatch(previousBoard(true)),
-  }
+  return { }
 }
 
-
-function PrimarySearchAppBar(props) {
+function PrimarySearchAppBar() {
   const classes = useStyles();
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [userAnchorEl, setUserAnchorEl] = React.useState(null);
   const [boardAnchorEl, setBoardAnchorEl] = React.useState(null);
-  let id = useSelector(state => state.index);
+  const [addAnchorEl, setAddAnchorEl] = React.useState(null);
+  const isUserMenuOpen = Boolean(userAnchorEl);
+  const isBoardMenuOpen = Boolean(boardAnchorEl);
+  const isAddMenuOpen = Boolean(addAnchorEl);
   const [title, setTitle] = React.useState(null);
-  let location = useLocation();
-  let { aa } = useParams();
-  console.log("aa");
-  console.log(id);
-  console.log(props.index);
-  console.log(location.pathname);
   const dispatch = useDispatch();
-
+  let id = useSelector(state => state.index);
+  let boards = useSelector(state => state.boards);
+  let location = useLocation();
+  //let { id_props } = useParams();
 
   useEffect(() => {
-
-    if (parseInt(id, 10) > -1) {
+    if (parseInt(id, 10) > -1 ) {
       console.log(id);
-      setTitle(props.boards[parseInt(id, 10)].title);
+      console.log(boards[parseInt(id, 10)]);
+      setTitle(boards[parseInt(id, 10)].title);
+      dispatch(setBoard(parseInt(id, 10)));
     }
   }, [id]);
 
   useEffect(() => {
-    if (location.pathname === '/')
-    setTitle(props.boards[id].title);
-  else if (location.pathname === '/add')
-    setTitle("Add Board");
+    if (location.pathname.substring(0, 7) === "/board/" ) {
+      console.log(location.pathname);
+      id = parseInt(location.pathname.substring(7), 10);
+      setTitle(boards[parseInt(id, 10)].title);
+      dispatch(setBoard(parseInt(id, 10)));
+    }console.log(id);
+     if (location.pathname === '/') {
+      id = 0;
+      setTitle(boards[id].title);
+    }
+    else if (location.pathname === '/add/board')
+      setTitle("Add Board");
+    else if (location.pathname === '/add/postit')
+      setTitle("Add PostIt");
   }, [location.pathname]);
 
-  const isMenuOpen = Boolean(anchorEl);
-  const isBoardMenuOpen = Boolean(boardAnchorEl);
+  const handleUserMenuOpen = (event) => {
+    setUserAnchorEl(event.currentTarget);
+  };
 
-  const handleProfileMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
+  const handleBoardMenuOpen = (event) => {
+    setBoardAnchorEl(event.currentTarget);
+  };
+
+  const handleAddMenuOpen = (event) => {
+    setAddAnchorEl(event.currentTarget);
   };
 
   const handleBoardMenuClose = () => {
     setBoardAnchorEl(null);
   };
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
+  const handleUserMenuClose = () => {
+    setUserAnchorEl(null);
   };
 
-  const handleBoardMenuOpen = (event) => {
-    setBoardAnchorEl(event.currentTarget);
+  const handleAddMenuClose = () => {
+    setAddAnchorEl(null);
   };
+
   const changeBoard = index => {
-    setTitle(props.boards[index].title);
-    handleBoardMenuClose();
+    console.log(index);
+    if (parseInt(index, 10) > -1) {
+      setTitle(boards[index].title);
+      dispatch(setBoard(parseInt(index, 10)));
+      handleBoardMenuClose();
+    }
   };
 
-  const menuId = 'primary-search-account-menu';
+  const handleDeleteBoard = () => {
+    dispatch(deleteBoard(id));
+    if (id < boards.length - 1)
+      setTitle(boards[parseInt(id + 1, 10)].title);
+    else
+      setTitle(boards[parseInt(id - 1, 10)].title);
+  };
+
+  const userMenuId = 'menu-account';
   const renderMenuUser = (
     <Menu
-      anchorEl={anchorEl}
+      anchorEl={userAnchorEl}
       anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-      id={menuId}
+      id={userMenuId}
       keepMounted
       transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-      open={isMenuOpen}
-      onClose={handleMenuClose}
+      open={isUserMenuOpen}
+      onClose={handleUserMenuClose}
     >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+      <MenuItem onClick={handleUserMenuClose}>Profile</MenuItem>
+      <MenuItem onClick={handleUserMenuClose}>My account</MenuItem>
     </Menu>
   );
 
-  const boardMenuId = 'primary-search-account-menu-board';
-
+  const boardMenuId = 'menu-board';
   const renderMenuBords = (
     <Menu
       anchorEl={boardAnchorEl}
@@ -122,11 +137,31 @@ function PrimarySearchAppBar(props) {
       open={isBoardMenuOpen}
       onClose={handleBoardMenuClose}
     >
-      {props.boards.map((board, index) => (
-        <Link to={`/${index}`} className={classes.links} key={index}>
+      {boards.map((board, index) => (
+        <Link to={`/board/${index}`} className={classes.links} key={index}>
           <MenuItem onClick={() => changeBoard(index)}>{board.title}</MenuItem>
         </Link>
       ))}
+    </Menu>
+  );
+
+  const addMenuId = 'menu-add';
+  const renderMenuAdd = (
+    <Menu
+      anchorEl={addAnchorEl}
+      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      id={addMenuId}
+      keepMounted
+      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+      open={isAddMenuOpen}
+      onClose={handleAddMenuClose}
+    >
+      <Link to="/add/board" className={classes.links} onClick={() => handleAddMenuClose} >
+        <MenuItem >Add new Board</MenuItem>
+      </Link>
+      <Link to="/add/postit" className={classes.links} onClick={() => handleAddMenuClose}>
+        <MenuItem >Add new POSTIT</MenuItem>
+      </Link>
     </Menu>
   );
 
@@ -137,11 +172,11 @@ function PrimarySearchAppBar(props) {
         <Toolbar>
           <IconButton
             edge="start"
+            aria-label="open drawer"
+            aria-controls={boardMenuId}
             onClick={handleBoardMenuOpen}
             color="inherit"
-            aria-label="open drawer"
-            aria-haspopup="true"
-            aria-controls={boardMenuId}
+          //   aria-haspopup="true"
           >
             <MenuIcon />
           </IconButton>
@@ -164,57 +199,83 @@ function PrimarySearchAppBar(props) {
 
           </div>
 
+
+          <IconButton
+            edge="start"
+            onClick={handleAddMenuOpen}
+            color="inherit"
+            aria-label="open drawer"
+            aria-haspopup="true"
+            aria-controls={addMenuId}
+          >
+            <AddIcon />
+          </IconButton>
           <>
             {
               id > -1 ?
                 <>
-                  <IconButton
-                    color="inherit"
-                    aria-label="Next"
-                    aria-haspopup="true"
-                  >
-                    <Link to={`/${id - 1}`} className={classes.links} >
-                      <NavigateBefore />
-                    </Link>
+                  {
+                    id > 0 ?
+                      <>
+                        <IconButton
+                          color="primary"
+                          aria-label="Next"
+                          aria-haspopup="true"
+                          onClick={() => dispatch(previousBoard(id))}
+                        >
+                          <Link to={`/board/${id - 1}`} className={classes.links} >
+                            <NavigateBefore />
+                          </Link>
+                        </IconButton>
+                      </>
+                      : ""
 
-                  </IconButton>
+                  }
+
+                  {
+                    id < boards.length - 1 ?
+                      <>
+                        <IconButton
+                          color="primary"
+                          aria-label="Next"
+                          aria-haspopup="true"
+                          onClick={() => dispatch(nextBoard(id))}
+                        >
+                          <Link to={`/board/${id + 1}`} className={classes.links} >
+                            <NavigateNextIcon />
+                          </Link>
+                        </IconButton>
+                      </>
+                      : ""
+                  }
+
 
                   <IconButton
                     color="inherit"
                     aria-label="Next"
                     aria-haspopup="true"
                   >
-                    <Link to={`/${id + 1}`} className={classes.links} >
-                      <NavigateNextIcon />
-                    </Link>
-                  </IconButton>
-
-                  <IconButton
-                    color="inherit"
-                    aria-label="Next"
-                    aria-haspopup="true"
-                  >
-                    <Link to={'/add'} className={classes.links} >
-                      <AddIcon />
-                    </Link>
-                  </IconButton>
-                  <IconButton
-                    color="inherit"
-                    aria-label="Next"
-                    aria-haspopup="true"
-                  >
-                    <Link to={`/update/${id}`} className={classes.links}>
+                    <Link to={`/update/board/${id}`} className={classes.links}>
                       <UpdateIcon />
                     </Link>
-
                   </IconButton>
                 </>
                 : null
 
             }
+            <IconButton
+              edge="start"
+              onClick={() => handleDeleteBoard}
+              color="inherit"
+              aria-label="open drawer"
+              aria-haspopup="true"
+            >
+              <Link to={`/board/${id < boards.length - 1 ? id : id - 1}`} className={classes.links} >
+                <DeleteIcon className={classes.iconHover} />
+              </Link>
+
+            </IconButton>
           </>
-
-
           <div className={classes.grow} />
           <div className={classes.sectionDesktop}>
             <IconButton aria-label="show 4 new mails" color="inherit">
@@ -230,9 +291,9 @@ function PrimarySearchAppBar(props) {
             <IconButton
               edge="end"
               aria-label="account of current user"
-              aria-controls={menuId}
+              aria-controls={userMenuId}
               aria-haspopup="true"
-              onClick={handleProfileMenuOpen}
+              onClick={handleUserMenuOpen}
               color="inherit"
             >
               <AccountCircle />
@@ -243,6 +304,7 @@ function PrimarySearchAppBar(props) {
       </AppBar>
       {renderMenuUser}
       {renderMenuBords}
+      {renderMenuAdd}
     </div>
   );
 }

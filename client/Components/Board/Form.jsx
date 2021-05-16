@@ -1,59 +1,54 @@
 import React, { useState, useEffect } from 'react';
-import { TextField, Button, Typography, Paper, Radio, RadioGroup, FormLabel, FormControlLabel } from '@material-ui/core';
+import { TextField, Button, Typography, Paper} from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import useStyles from './FormStyle';
-import { setBoard, createBoard } from '../../actions/index';
+import { setBoard, createBoard, updateBoard } from '../../actions/index';
 import { useHistory, useParams } from "react-router-dom";
 
-const Form = ({ match }) => {
-
+const Form = () => {
     const dispatch = useDispatch();
     const classes = useStyles();
-    const [board, setBoa] = useState({ title: '', postits: [] });
-    let history = useHistory();
+    const [board, setBoa] = useState({ title: '', notes: '' });
+    let index = useSelector(state => state.index);
     let { id } = useParams();
-    console.log(id);
     const bor = useSelector(state => state.boards[id]);
-    console.log(bor);
-  if(id && bor){
-    useEffect(() => {
-        if (parseInt(id, 10) > -1 && bor) {
-            dispatch(setBoard(parseInt(id, 10)));
-            setBoa(bor);
-        }
-    }, [id]);
-  }
+    const length = useSelector(state => state.boards.length);
+    let history = useHistory();
 
-
-
-    console.log(useSelector(state => state.boards[id]));
+    if (id && bor) {
+        useEffect(() => {
+            if (parseInt(id, 10) > -1 && bor) {
+                dispatch(setBoard(parseInt(id, 10)));
+                setBoa(bor);
+            }
+        }, [id]);
+    }
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        /* if (user._id === 0) {
-           dispatch(createUser(user));
-           clear();
-         } else {
-           dispatch(updateUser(user._id, user));
-           history.push(`/user/details/${match.params.id}`);
-         }*/
-        console.log(e);
+        console.log(index);
+        if (!id) {
+            dispatch(createBoard(board));
+            history.push("/board/" + length);
+            clear();
+        } else {
+            setBoa(bor);
+            console.log(bor);
+            dispatch(updateBoard(board));
+            history.push("/board/" + id);
+        }
     };
 
     const clear = () => {
-        setBoa({ title: '', postits: [] });
+        setBoa({ title: '', notes: [] });
     };
-
-
 
     return (
         <Paper className={classes.paper}>
-            <Typography variant="h6">{'Creating a Memory'}</Typography>
+            <Typography variant="h6">{id ? 'Update ' + board.title : 'Creating a Board'}</Typography>
             <form autoComplete="off" noValidate className={`${classes.root} ${classes.form}`} onSubmit={handleSubmit} >
-                <TextField name="title" variant="outlined" label={"title"} fullWidth value={board.title} onChange={(e) => setBoa({ ...board, title: e.target.value })} />
-
-
-
+                <TextField name="title" variant="outlined" label={"Title"} fullWidth value={board.title} onChange={(e) => setBoa({ ...board, title: e.target.value })} />
+                <TextField name="notes" variant="outlined" label={"Notes"} fullWidth value={board.notes} onChange={(e) => setBoa({ ...board, notes: e.target.value })} />
                 <Button className={classes.buttonSubmit} variant="contained" color="primary" size="large" type="submit" fullWidth>Submit</Button>
                 <Button variant="contained" color="secondary" size="small" onClick={clear} fullWidth>Clear</Button>
             </form>
